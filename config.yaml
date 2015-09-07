@@ -1,0 +1,8 @@
+# 绑定的server
+server: 127.0.0.1:35555
+
+# 配置sentry
+sentry: ""
+
+# 开发模式
+devmode: True
