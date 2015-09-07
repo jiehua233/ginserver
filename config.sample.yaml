@@ -2,7 +2,10 @@
 server: 127.0.0.1:35555
 
 # 配置sentry
-sentry: ""
+sentry: "http://23dfb878159d4c0f90732e141d821f5f:a738655d0d90475192c7398975611cc1@sentry.chenjiehua.me/4"
+
+# 日志
+logger: "logger.xml"
 
 # 开发模式
-devmode: True
+devmode: False

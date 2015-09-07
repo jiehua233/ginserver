@@ -1,0 +1,16 @@
+<seelog>
+    <outputs>
+        <console formatid="main"/>
+        <custom name="sentry" formatid="err" />
+        <filter levels="info" formatid="main">
+            <file path="/home/jachua/log/ginserver/info.log" />
+        </filter>
+        <filter levels="error" formatid="err">
+            <file path="/home/jachua/log/ginserver/error.log" />
+        </filter>
+    </outputs>
+    <formats>
+        <format id="main" format="%Date(2006 Jan 02/15:04:05 MST) [%Level] %Msg%n" />
+        <format id="err" format="%Date(2006 Jan 02/15:04:05 MST) [%Level] [%RelFile:%Line %Func] %Msg%n" />
+    </formats>
+</seelog>
