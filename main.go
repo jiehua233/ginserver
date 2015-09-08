@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"io/ioutil"
 
 	log "github.com/cihub/seelog"
@@ -36,7 +35,6 @@ func parseCmdLine() {
 			panic(err)
 		}
 	}
-	fmt.Printf("%v\n", cfg)
 }
 
 func initLogger() {
@@ -53,7 +51,19 @@ func initLogger() {
 	// 初始化logger
 	if cfg.Logger != "" {
 		// 自定义一个seelog raven receiver
-		//receiver := &
+		receiver := &RavenReciver{Client: Raven}
+		parseParams := &log.CfgParseParams{
+			CustomReceiverProducers: map[string]log.CustomReceiverProducer{
+				"sentry": func(log.CustomReceiverInitArgs) (log.CustomReceiver, error) {
+					return receiver, nil
+				},
+			},
+		}
+		if logger, err := log.LoggerFromParamConfigAsFile(cfg.Logger, parseParams); err == nil {
+			log.ReplaceLogger(logger)
+		} else {
+			log.Error("Parse Logger Error: ", err)
+		}
 
 	}
 

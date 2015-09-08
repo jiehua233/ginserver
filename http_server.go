@@ -1,6 +1,8 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
 
 	log "github.com/cihub/seelog"
@@ -12,11 +14,14 @@ func httpServer() {
 	//gin.SetMode(gin.ReleaseMode)
 	router := gin.New()
 	if cfg.DevMode {
+		log.Info("Use Gin Logger")
 		router.Use(gin.Logger())
 	}
 	if cfg.Sentry != "" && Raven != nil {
+		log.Info("Use Custom Recovery")
 		router.Use(recovery(Raven))
 	} else {
+		log.Info("Use Gin Recovery")
 		router.Use(gin.Recovery())
 	}
 
@@ -40,7 +45,22 @@ func handler(c *gin.Context) {
 func recovery(client *raven.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		defer func() {
+			for _, item := range c.Errors {
+				packet := raven.NewPacket(item.Err.Error(), &raven.Message{Message: item.Err.Error(), Params: []interface{}{item.Meta}}, raven.NewHttp(c.Request))
+				_, ch := client.Capture(packet, nil)
+				if err := <-ch; err != nil {
+					log.Error("Gin Error: ", err)
+				}
+			}
+			if rval := recover(); rval != nil {
+				c.Writer.WriteHeader(http.StatusInternalServerError)
 
+				message := fmt.Sprint(rval)
+				trace := raven.NewStacktrace(0, 2, nil)
+				packet := raven.NewPacket(message, raven.NewException(errors.New(message), trace), raven.NewHttp(c.Request))
+				client.Capture(packet, nil)
+				log.Error("Gin Error: ", message)
+			}
 		}()
 		c.Next()
 	}
